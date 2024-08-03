@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+</head>
+<style>
+    body{
+        background-image: url(./quiz_back.avif);
+    }
+    .quiz-container {
+    background: linear-gradient(240deg, skyblue, pink);
+    width: 30%;
+    margin: auto;
+    padding: 30px;
+    border-radius: 10px;
+    border: none;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0px 15px 0px 20px rgb(35, 0, 53) ;
+}
+
+.question {
+    font-size: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.question p {
+    margin-bottom: 10px;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+}
+
+.options label {
+    margin-bottom: 5px;
+}
+
+#submit-btn {
+    color: white;
+    background-color: rgb(0, 89, 255);
+    padding: 10px;
+    font-size: 12px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 15px;
+}
+
+#refresh-btn {
+    background-color: orange;
+    padding: 20px;
+    font-size: 12px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    margin: 20px;
+    cursor: pointer;
+    width: 30%;
+    align-self: center;
+}
+
+h2 {
+    font-size: 2.5rem;
+}
+</style>
+<body>
+     <div class="quiz-container">
+        <h2>Random Math Quiz</h2>
+        <div id="quiz"></div>
+        
+        <button id="submit-btn">Submit Quiz</button>
+        <button id="refresh-btn">Refresh Questions</button>
+        
+    </div>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    generateQuiz();
+
+    document.getElementById('refresh-btn').addEventListener('click', () => {
+        generateQuiz();
+    });
+
+    document.getElementById('submit-btn').addEventListener('click', () => {
+        submitQuiz();
+    });
+});
+
+let questionsData = [];
+
+function generateQuiz() {
+    const quizContainer = document.getElementById('quiz');
+    quizContainer.innerHTML = ''; // Clear previous quiz
+    const resultBox = document.getElementById('result-box');
+    if (resultBox) {
+        resultBox.remove(); // Remove previous result box if it exists
+    }
+
+    questionsData = generateQuestions(4);
+
+    questionsData.forEach((question, index) => {
+        const questionElement = document.createElement('div');
+        questionElement.classList.add('question');
+        questionElement.innerHTML = `
+            <p>${index + 1}. ${question.question}</p>
+            <div class="options">
+                ${question.options.map((option, i) => `
+                    <label>
+                        <input type="radio" name="question${index}" value="${option}">
+                        ${option}
+                    </label>
+                `).join('')}
+            </div>
+        `;
+        quizContainer.appendChild(questionElement);
+    });
+}
+
+function generateQuestions(numQuestions) {
+    const questions = [];
+    for (let i = 0; i < numQuestions; i++) {
+        const num1 = Math.floor(Math.random() * 100);
+        const num2 = Math.floor(Math.random() * 100);
+        const operator = ['*', '-', '+'][Math.floor(Math.random() * 3)];
+        let questionText, correctAnswer;
+        switch (operator) {
+            case '*':
+                questionText = `What is ${num1} * ${num2}?`;
+                correctAnswer = num1 * num2;
+                break;
+            case '-':
+                questionText = `What is ${num1} - ${num2}?`;
+                correctAnswer = num1 - num2;
+                break;
+            case '+':
+                questionText = `What is ${num1} + ${num2}?`;
+                correctAnswer = num1 + num2;
+                break;
+        }
+        const options = generateOptions(correctAnswer);
+        questions.push({ question: questionText, options, correctAnswer });
+    }
+    return questions;
+}
+
+function generateOptions(correctAnswer) {
+    const options = new Set();
+    options.add(correctAnswer);
+    while (options.size < 4) {
+        options.add(correctAnswer + Math.floor(Math.random() * 10) - 5);
+    }
+    return Array.from(options).sort((a, b) => a - b);
+}
+
+function submitQuiz() {
+    const quizContainer = document.getElementById('quiz');
+    const resultBox = document.getElementById('result-box');
+    if (resultBox) {
+        resultBox.remove(); // Remove previous result box if it exists
+    }
+
+    const questions = quizContainer.querySelectorAll('.question');
+    let score = 0;
+
+    questions.forEach((question, index) => {
+        const selectedOption = question.querySelector('input[type="radio"]:checked');
+        if (selectedOption && parseInt(selectedOption.value) === questionsData[index].correctAnswer) {
+            score++;
+        }
+    });
+
+    displayResult(score, questions.length);
+}
+
+function displayResult(score, total) {
+    const resultBox = document.createElement('div');
+    resultBox.id = 'result-box';
+    resultBox.innerText = `You scored ${score} out of ${total}`;
+    resultBox.style.marginTop = '20px';
+    resultBox.style.padding = '10px';
+    resultBox.style.border = '1px solid darkgreen';
+    resultBox.style.borderRadius = '5px';
+    resultBox.style.backgroundColor = 'lightgreen';
+    resultBox.style.color = 'Black';
+
+    const quizContainer = document.querySelector('.quiz-container');
+    quizContainer.appendChild(resultBox);
+}
+
+</script>
+</html>
